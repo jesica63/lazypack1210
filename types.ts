@@ -1,4 +1,3 @@
-
 export interface LinkSuggestion {
   originalSegment?: string;
   revisedSegment?: string;
@@ -30,5 +29,21 @@ export type CurationStatus = 'idle' | 'scraping' | 'analyzing' | 'writing' | 'do
 export interface CurationRequest {
   topic: string;
   intro: string;
+  outline: string[]; // 新增：結構化大綱
   urls: string[];
+}
+
+// 新增：爬蟲抓取的資料結構
+export interface ScrapedContent {
+  id: number;
+  url: string;
+  title: string;
+  content: string;
+}
+
+// 新增：架構師產出的草稿結構
+export interface ArchitectDraft {
+  sectionTitle: string;
+  contentDraft: string;
+  sourceIds: number[];
 }
