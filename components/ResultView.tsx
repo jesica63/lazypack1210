@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AnalysisResult } from '../types';
 import { FileText, ArrowRight, Sparkles, Download, Copy, Check } from 'lucide-react';
 import { marked } from 'marked';
-import DOMPurify from 'dompurify'; // Security Fix: Import DOMPurify
+import DOMPurify from 'dompurify'; // 這是最關鍵的一行，現在我們可以用了！
 
 interface ResultViewProps {
   result: AnalysisResult | null;
@@ -39,18 +39,18 @@ const ResultView: React.FC<ResultViewProps> = ({ result, loading }) => {
     );
   }
 
-  // Security Fix: Sanitize HTML before rendering
+  // Security Fix: 使用 DOMPurify 進行標準清洗
   const getHtml = (markdown: string) => {
       try {
           const rawHtml = marked.parse(markdown) as string;
-          // Config DOMPurify to allow specific tags but strip scripts
+          // 設定 DOMPurify 允許 iframe (例如 YouTube 影片) 但過濾腳本
           const cleanHtml = DOMPurify.sanitize(rawHtml, {
-            ADD_TAGS: ['iframe'], // Optional: allow iframes if you trust source
-            ADD_ATTR: ['target', 'allowfullscreen', 'frameborder']
+            ADD_TAGS: ['iframe'], 
+            ADD_ATTR: ['target', 'allowfullscreen', 'frameborder', 'src']
           });
           return { __html: cleanHtml };
       } catch (e) {
-          // Fallback but still sanitize
+          // 萬一解析失敗，還是要清洗原始文字
           return { __html: DOMPurify.sanitize(markdown) };
       }
   };
@@ -61,7 +61,6 @@ const ResultView: React.FC<ResultViewProps> = ({ result, loading }) => {
         const rawHtml = await marked.parse(result.revisedArticle);
         const cleanHtml = DOMPurify.sanitize(rawHtml as string);
 
-        // Wrap in a simple HTML structure to ensure clipboard readers interpret it correctly
         const fullHtml = `
             <!DOCTYPE html>
             <html>
@@ -84,7 +83,6 @@ const ResultView: React.FC<ResultViewProps> = ({ result, loading }) => {
         setTimeout(() => setCopiedRich(false), 2000);
     } catch (e) {
         console.error("Rich text copy failed", e);
-        // Fallback to text copy
         navigator.clipboard.writeText(result.revisedArticle);
         alert("瀏覽器不支援富文本複製，已複製 Markdown 原始碼。");
     }
@@ -131,7 +129,7 @@ ${cleanHtml}
 
   return (
     <div className="flex flex-col h-full space-y-4 overflow-hidden">
-      {/* Suggestions Summary - Only show if there are suggestions */}
+      {/* Suggestions Summary */}
       {hasSuggestions && (
         <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex-shrink-0 transition-all">
             <h3 className="text-sm font-bold text-indigo-900 flex items-center gap-2 mb-3">
@@ -180,7 +178,7 @@ ${cleanHtml}
                     ? 'bg-green-50 text-green-700 border-green-200' 
                     : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
                 }`}
-                title="複製為帶格式的內容 (可直接貼上到 Word/Docs)"
+                title="複製為帶格式的內容"
             >
                 {copiedRich ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                 {copiedRich ? '已複製！' : '複製格式化全文'}
@@ -188,7 +186,7 @@ ${cleanHtml}
             <button 
                 onClick={handleExportHtml}
                 className="text-xs font-medium px-3 py-1.5 rounded transition-all flex items-center gap-1.5 border text-slate-600 hover:text-indigo-600 border-slate-200 hover:bg-slate-50"
-                title="下載 HTML 檔案 (可使用 Word 開啟)"
+                title="下載 HTML 檔案"
             >
                 <Download className="w-3 h-3" />
                 匯出 HTML
