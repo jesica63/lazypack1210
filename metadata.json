@@ -1,0 +1,5 @@
+{
+  "name": "（一鍵複製版）內部連結小工具",
+  "description": "一款智慧內部連結優化工具。它會分析您的文章內容與網站地圖，並使用 Google Gemini 模型推薦高價值的內部連結。",
+  "requestFramePermissions": []
+}

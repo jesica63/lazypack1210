@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkWeaver AI - Internal Link Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      /* Custom Scrollbar for Textareas */
+      textarea::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      textarea::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      textarea::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      textarea::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Quill Editor Customization to match Tailwind UI */
+      .ql-toolbar {
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        background-color: #f8fafc;
+        border-top-left-radius: 0.75rem;
+        border-top-right-radius: 0.75rem;
+      }
+      .ql-container {
+        border: none !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1rem !important;
+      }
+      .ql-editor {
+        padding: 1.5rem !important;
+        min-height: 100%;
+      }
+      /* Typography for Editor and Result */
+      .ql-editor h1, .prose h1 { font-size: 2em; font-weight: 700; margin-bottom: 0.5em; margin-top: 0.5em; color: #1e293b; }
+      .ql-editor h2, .prose h2 { font-size: 1.5em; font-weight: 600; margin-bottom: 0.5em; margin-top: 0.5em; color: #334155; }
+      .ql-editor h3, .prose h3 { font-size: 1.25em; font-weight: 600; margin-bottom: 0.5em; margin-top: 0.5em; color: #475569; }
+      .ql-editor p, .prose p { margin-bottom: 1em; line-height: 1.75; color: #334155; }
+      .ql-editor ul, .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+      .ql-editor ol, .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+      .ql-editor img, .prose img { max-width: 100%; border-radius: 0.5rem; margin: 1rem 0; }
+      .ql-editor blockquote, .prose blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #64748b; font-style: italic; }
+      .prose a { color: #4f46e5; text-decoration: underline; font-weight: 500; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "turndown": "https://esm.sh/turndown@7.1.2",
+    "mammoth": "https://esm.sh/mammoth@1.6.0",
+    "quill": "https://esm.sh/quill@2.0.2",
+    "marked": "https://esm.sh/marked@12.0.0",
+    "prop-types": "https://esm.sh/prop-types@15.8.1",
+    "lodash": "https://esm.sh/lodash@4.17.21"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden">
+    <div id="root" class="h-full w-full"></div>
+  </body>
+</html>
