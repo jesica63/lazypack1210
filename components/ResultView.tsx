@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { AnalysisResult } from '../types';
 import { FileText, ArrowRight, Sparkles, Download, Copy, Check } from 'lucide-react';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify'; // Security Fix: Import DOMPurify
 
 interface ResultViewProps {
   result: AnalysisResult | null;
@@ -39,25 +39,34 @@ const ResultView: React.FC<ResultViewProps> = ({ result, loading }) => {
     );
   }
 
-  // Convert markdown to HTML safely for display
+  // Security Fix: Sanitize HTML before rendering
   const getHtml = (markdown: string) => {
       try {
-          return { __html: marked.parse(markdown) };
+          const rawHtml = marked.parse(markdown) as string;
+          // Config DOMPurify to allow specific tags but strip scripts
+          const cleanHtml = DOMPurify.sanitize(rawHtml, {
+            ADD_TAGS: ['iframe'], // Optional: allow iframes if you trust source
+            ADD_ATTR: ['target', 'allowfullscreen', 'frameborder']
+          });
+          return { __html: cleanHtml };
       } catch (e) {
-          return { __html: markdown };
+          // Fallback but still sanitize
+          return { __html: DOMPurify.sanitize(markdown) };
       }
   };
 
   const handleCopyRichText = async () => {
     if (!result) return;
     try {
-        const htmlContent = await marked.parse(result.revisedArticle);
+        const rawHtml = await marked.parse(result.revisedArticle);
+        const cleanHtml = DOMPurify.sanitize(rawHtml as string);
+
         // Wrap in a simple HTML structure to ensure clipboard readers interpret it correctly
         const fullHtml = `
             <!DOCTYPE html>
             <html>
             <head><meta charset="UTF-8"></head>
-            <body>${htmlContent}</body>
+            <body>${cleanHtml}</body>
             </html>
         `;
 
@@ -84,7 +93,9 @@ const ResultView: React.FC<ResultViewProps> = ({ result, loading }) => {
   const handleExportHtml = async () => {
       if(!result) return;
       
-      const htmlContent = await marked.parse(result.revisedArticle);
+      const rawHtml = await marked.parse(result.revisedArticle);
+      const cleanHtml = DOMPurify.sanitize(rawHtml as string);
+
       const fullHtml = `
 <!DOCTYPE html>
 <html>
@@ -101,7 +112,7 @@ blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #64748b;
 </style>
 </head>
 <body>
-${htmlContent}
+${cleanHtml}
 </body>
 </html>`;
 
