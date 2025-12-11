@@ -1,11 +1,9 @@
-
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AnalysisResult } from "../types";
 import { SYSTEM_INSTRUCTION } from "./prompts";
 
 const processSitemapUrls = (urls: string[]): string => {
   // Truncate list if too long to save context.
-  // We take the first 500 URLs to stay within reasonable context limits for a demo.
   return urls.slice(0, 500).join("\n");
 };
 
@@ -19,7 +17,6 @@ export const analyzeArticleWithGemini = async (
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  // Schema definition for structured output
   const responseSchema: Schema = {
     type: Type.OBJECT,
     properties: {
@@ -70,14 +67,14 @@ export const analyzeArticleWithGemini = async (
   `;
 
   try {
+    // 🔥 UPDATE: 使用 gemini-2.0-flash-exp
     const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview", // Using Pro for complex reasoning/SEO logic
-      contents: userPrompt,
+      model: "gemini-2.0-flash-exp", 
+      contents: [{ parts: [{ text: userPrompt }] }],
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
         responseMimeType: "application/json",
         responseSchema: responseSchema,
-        thinkingConfig: { thinkingBudget: 1024 }
       },
     });
 
@@ -89,8 +86,7 @@ export const analyzeArticleWithGemini = async (
     const result = JSON.parse(jsonText) as AnalysisResult;
     return result;
   } catch (error) {
-    // Log generic error to avoid leaking prompt details in console if user opens devtools
-    console.error("Gemini Analysis Error occurred.");
+    console.error("Gemini Analysis Error occurred.", error);
     throw error;
   }
 };

@@ -532,5 +532,3 @@ ${content}
 };
 
 export default ArticleEditor;
-
-export default ArticleEditor;

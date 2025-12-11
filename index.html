@@ -56,26 +56,10 @@
       .ql-editor blockquote, .prose blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #64748b; font-style: italic; }
       .prose a { color: #4f46e5; text-decoration: underline; font-weight: 500; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "turndown": "https://esm.sh/turndown@7.1.2",
-    "mammoth": "https://esm.sh/mammoth@1.6.0",
-    "quill": "https://esm.sh/quill@2.0.2",
-    "marked": "https://esm.sh/marked@12.0.0",
-    "prop-types": "https://esm.sh/prop-types@15.8.1",
-    "lodash": "https://esm.sh/lodash@4.17.21"
-  }
-}
-</script>
-</head>
+  </head>
   <body class="bg-slate-50 text-slate-900 h-screen overflow-hidden">
     <div id="root" class="h-full w-full"></div>
+    <!-- 👇 這行就是之前缺少的關鍵代碼！ 👇 -->
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

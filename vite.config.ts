@@ -11,8 +11,11 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
+        // 🚑 防止 process is not defined 錯誤
+        'process.env': {}, 
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'global': {},
       },
       resolve: {
         alias: {
