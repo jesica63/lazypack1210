@@ -12,7 +12,7 @@ const COMPANY_STYLE_GUIDE = `
    - 每一段落長度控制在 250-550 字之間，避免閱讀疲勞。
    - 拒絕廢話，第一句話就切入重點。
 3. **術語規範**：遇到英文專有名詞，第一次出現時請標註中文解釋。標點符號一律使用全形。
-4. **絕對禁語**：不要使用「讓我們繼續看下去」、「小編」、「總而言之」、「綜上所述」這類農場文或過度煽情激動的用語。英文與數字前後不可加入半形空格。
+4. **絕對禁語**：不要使用「讓我們繼續看下去」、「小編」、「總而言之」、「綜上所述」這類農場文或過度正式的用語。英文與數字前後絕對禁止加上半形空格。
 `;
 
 // ==========================================
@@ -110,7 +110,6 @@ const runArchitectStage = async (
     ${dataContext}
   `;
 
-  // 修正 1: 使用 Type 而不是 SchemaType
   const schema = {
     type: Type.ARRAY,
     items: {
@@ -139,9 +138,7 @@ const runArchitectStage = async (
       },
     });
 
-    // 修正 2: 移除括號。新版 SDK 中 text 是屬性不是方法。
-    // 原本: response.text() -> 錯誤
-    // 現在: response.text   -> 正確
+    // 🔥 修正關鍵：不加括號
     const text = response.text; 
     
     if (!text) throw new Error("AI 回傳空內容");
@@ -174,7 +171,7 @@ const runEditorStage = async (
     你現在是總編輯。你的任務是將架構師提供的「段落草稿」改寫成一篇完整的 HTML 懶人包文章。
     
     【執行細節】
-    1. **開場 (Intro)**：根據使用者的指示 (${userIntro}) 寫一段淺白生動，不煽情的開場白。
+    1. **開場 (Intro)**：根據使用者的指示 (${userIntro}) 寫一段精彩的開場白。
     2. **內文擴寫**：針對 JSON 中的每一個 sectionTitle，使用 contentDraft 寫出一段完整的內容。
        - 使用 <h2> 作為段落標題。
        - 內容長度必須控制在 300-500 字左右，保持各段落平衡。
@@ -206,7 +203,7 @@ const runEditorStage = async (
         },
       });
 
-      // 修正 2: 同樣移除括號
+      // 🔥 修正關鍵：不加括號
       let html = response.text || "";
       
       html = html.replace(/```html/g, '').replace(/```/g, '').trim();

@@ -72,8 +72,8 @@ const App: React.FC = () => {
             <Layout className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-800 leading-tight">LinkWeaver AI</h1>
-            <p className="text-xs text-slate-500">內部連結優化助手</p>
+            <h1 className="text-lg font-bold text-slate-800 leading-tight">SEO LazyPack</h1>
+            <p className="text-xs text-slate-500">懶人包生成助理</p>
           </div>
         </div>
         
