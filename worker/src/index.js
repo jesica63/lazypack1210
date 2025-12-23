@@ -101,6 +101,22 @@ ${articleContent}
 ${limitedUrls.join('\n')}
     `.trim();
 
+    // 增強 systemInstruction 以確保返回正確的 JSON 格式
+    const enhancedSystemInstruction = `${systemInstruction}
+
+請以 JSON 格式回應，包含以下欄位：
+{
+  "revisedArticle": "完整的修訂後文章內容（Markdown 格式）",
+  "suggestions": [
+    {
+      "anchorText": "錨點文字",
+      "targetUrl": "目標 URL",
+      "reason": "選擇此連結的原因（繁體中文）",
+      "revisedSegment": "包含新連結的優化段落"
+    }
+  ]
+}`;
+
     const geminiRequest = {
       contents: [
         {
@@ -108,11 +124,10 @@ ${limitedUrls.join('\n')}
         }
       ],
       systemInstruction: {
-        parts: [{ text: systemInstruction }]
+        parts: [{ text: enhancedSystemInstruction }]
       },
       generationConfig: {
-        responseMimeType: 'application/json',
-        responseSchema: body.responseSchema || undefined
+        responseMimeType: 'application/json'
       }
     };
 
@@ -160,8 +175,7 @@ async function handleCuration(request, env, origin) {
         parts: [{ text: systemInstruction }]
       },
       generationConfig: responseSchema ? {
-        responseMimeType: 'application/json',
-        responseSchema: responseSchema
+        responseMimeType: 'application/json'
       } : {}
     };
 
