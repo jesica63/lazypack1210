@@ -2,18 +2,31 @@ import React, { useState } from 'react';
 import { AnalysisResult } from '../types';
 import { FileText, ArrowRight, Sparkles, Download, Copy, Check } from 'lucide-react';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
-// Security Fix: Custom Sanitizer
-// 自製清洗器：移除危險的腳本，但保留安全的 HTML 標籤 (如連結 a, 列表 ul/li, 標題 h2)
-const sanitizeHtml = (html: string) => {
+// Security Fix: Use DOMPurify for robust XSS protection
+// 使用 DOMPurify 進行強大的 XSS 防護
+const sanitizeHtml = (html: string): string => {
   if (!html) return "";
-  // 1. 移除 script 標籤
-  let clean = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "");
-  // 2. 移除事件監聽器 (如 onclick)
-  clean = clean.replace(/ on\w+="[^"]*"/g, "");
-  // 3. 移除 javascript: 偽協議
-  clean = clean.replace(/javascript:/gi, "");
-  return clean;
+
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'p', 'br', 'hr',
+      'ul', 'ol', 'li',
+      'a', 'strong', 'em', 'u', 'b', 'i',
+      'small', 'blockquote', 'pre', 'code',
+      'img', 'div', 'span'
+    ],
+    ALLOWED_ATTR: [
+      'href', 'target', 'rel', 'class',
+      'src', 'alt', 'title', 'width', 'height'
+    ],
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ALLOW_DATA_ATTR: false,
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    SAFE_FOR_TEMPLATES: true
+  });
 };
 
 interface ResultViewProps {
