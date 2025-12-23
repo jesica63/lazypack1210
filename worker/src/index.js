@@ -59,13 +59,13 @@ function successResponse(data, origin) {
 
 // 呼叫 Gemini API
 async function callGeminiAPI(apiKey, endpoint, requestBody) {
-  const url = `${GEMINI_API_BASE}/${endpoint}`;
+  // 使用 URL query parameter 傳遞 API key（Gemini API 的標準方式）
+  const url = `${GEMINI_API_BASE}/${endpoint}?key=${apiKey}`;
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(requestBody)
   });
