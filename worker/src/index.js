@@ -1,17 +1,18 @@
 /**
- * SEO LazyPack API Proxy - Cloudflare Worker
+ * SEO LazyPack API Proxy - Cloudflare Worker (修復版)
  *
  * This worker acts as a secure proxy between the frontend and Gemini API,
  * protecting the API key from being exposed to clients.
  */
 
 // 允許的來源網域（CORS 設定）
-// 🔧 部署後請修改為您的實際網域
 const ALLOWED_ORIGINS = [
   'http://localhost:3000',
+  'http://localhost:5173',      // 💡 Vite 常用端口
   'http://127.0.0.1:3000',
-  'https://yourdomain.com',  // ⚠️ 請改成您的網域
-  'https://www.yourdomain.com'  // ⚠️ 請改成您的網域
+  'http://127.0.0.1:5173',
+  'https://yourdomain.com',
+  'https://www.yourdomain.com'
 ];
 
 // Gemini API 端點
