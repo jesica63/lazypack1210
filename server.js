@@ -188,7 +188,7 @@ app.post('/api/analyze', async (req, res) => {
 
     // 呼叫 Gemini API
     const response = await callGeminiAPI(
-      'models/gemini-1.5-pro:generateContent',
+      'models/gemini-2.0-flash-exp:generateContent',
       geminiRequest
     );
 
@@ -282,7 +282,7 @@ app.post('/api/curate', async (req, res) => {
 
     // 呼叫 Gemini API
     const response = await callGeminiAPI(
-      'models/gemini-1.5-pro:generateContent',
+      'models/gemini-2.0-flash-exp:generateContent',
       geminiRequest
     );
 
