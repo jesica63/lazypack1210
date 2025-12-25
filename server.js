@@ -87,11 +87,21 @@ function convertToGeminiSchema(schema) {
     const result = {};
 
     for (const [key, value] of Object.entries(obj)) {
+      // 跳過 description 欄位（Gemini API 不支援）
+      if (key === 'description') continue;
+
       if (key === 'type') {
-        // 轉換類型名稱：ARRAY -> array, OBJECT -> object, STRING -> string, NUMBER -> number
-        result[key] = value.toLowerCase();
-      } else if (typeof value === 'object') {
+        // 保持大寫格式：ARRAY, OBJECT, STRING, NUMBER
+        result[key] = value.toUpperCase();
+      } else if (key === 'required') {
+        // required 欄位直接複製
+        result[key] = value;
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        // 遞迴處理物件
         result[key] = convert(value);
+      } else if (Array.isArray(value)) {
+        // 陣列直接複製
+        result[key] = value;
       } else {
         result[key] = value;
       }
