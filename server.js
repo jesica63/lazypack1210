@@ -75,6 +75,35 @@ app.use((req, res, next) => {
 });
 
 /**
+ * 將前端的 responseSchema 格式轉換為 Gemini API 格式
+ */
+function convertToGeminiSchema(schema) {
+  if (!schema) return null;
+
+  // 遞迴轉換 schema 結構
+  function convert(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+
+    const result = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === 'type') {
+        // 轉換類型名稱：ARRAY -> array, OBJECT -> object, STRING -> string, NUMBER -> number
+        result[key] = value.toLowerCase();
+      } else if (typeof value === 'object') {
+        result[key] = convert(value);
+      } else {
+        result[key] = value;
+      }
+    }
+
+    return result;
+  }
+
+  return convert(schema);
+}
+
+/**
  * 呼叫 Gemini API 的核心函數
  */
 async function callGeminiAPI(endpoint, requestBody) {
@@ -246,6 +275,12 @@ app.post('/api/curate', async (req, res) => {
     }
 
     // 構建 Gemini API 請求
+    const convertedSchema = responseSchema ? convertToGeminiSchema(responseSchema) : null;
+
+    if (convertedSchema) {
+      console.log('🔧 轉換後的 Schema:', JSON.stringify(convertedSchema, null, 2));
+    }
+
     const geminiRequest = {
       contents: [
         {
@@ -256,9 +291,11 @@ app.post('/api/curate', async (req, res) => {
         parts: [{ text: systemInstruction }]
       },
       generationConfig: responseSchema ? {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        responseSchema: convertedSchema
       } : {
-        temperature: 0.7
+        temperature: 0.7,
+        responseMimeType: 'text/plain'
       }
     };
 
