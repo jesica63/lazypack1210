@@ -226,18 +226,18 @@ app.post('/api/analyze', async (req, res) => {
 });
 
 /**
- * 文章生成端點
+ * 文章生成端點（懶人包生成）
  */
 app.post('/api/curate', async (req, res) => {
   console.log('\n========== 文章生成請求 ==========');
 
   try {
-    const { topic, keywords, systemInstruction } = req.body;
+    const { prompt, systemInstruction, responseSchema } = req.body;
 
     // 驗證必要參數
-    if (!topic) {
-      console.error('❌ 缺少 topic');
-      return res.status(400).json({ error: 'Missing topic' });
+    if (!prompt || !systemInstruction) {
+      console.error('❌ 缺少必要參數');
+      return res.status(400).json({ error: 'Missing required fields: prompt, systemInstruction' });
     }
 
     if (!GEMINI_API_KEY) {
@@ -245,38 +245,20 @@ app.post('/api/curate', async (req, res) => {
       return res.status(500).json({ error: 'API key not configured' });
     }
 
-    // 構建用戶提示
-    const keywordsText = (keywords && keywords.length > 0)
-      ? `關鍵字：${keywords.join(', ')}`
-      : '';
-
-    const userPrompt = `主題：${topic}\n${keywordsText}`;
-
-    // 增強 systemInstruction 確保返回 JSON 格式
-    const enhancedSystemInstruction = `${systemInstruction}
-
-請以 JSON 格式回應，包含以下欄位：
-{
-  "article": "生成的文章內容（Markdown 格式）",
-  "metadata": {
-    "title": "文章標題",
-    "summary": "文章摘要",
-    "keywords": ["關鍵字1", "關鍵字2"]
-  }
-}`;
-
     // 構建 Gemini API 請求
     const geminiRequest = {
       contents: [
         {
-          parts: [{ text: userPrompt }]
+          parts: [{ text: prompt }]
         }
       ],
       systemInstruction: {
-        parts: [{ text: enhancedSystemInstruction }]
+        parts: [{ text: systemInstruction }]
       },
-      generationConfig: {
+      generationConfig: responseSchema ? {
         responseMimeType: 'application/json'
+      } : {
+        temperature: 0.7
       }
     };
 
@@ -292,17 +274,24 @@ app.post('/api/curate', async (req, res) => {
       if (content && content.parts && content.parts[0]) {
         const resultText = content.parts[0].text;
 
-        try {
-          const parsedResult = JSON.parse(resultText);
-          console.log('✅ 文章生成成功');
-          return res.json(parsedResult);
-        } catch (parseError) {
-          console.error('❌ JSON 解析失敗:', parseError.message);
-          console.log('原始回應:', resultText);
-          return res.status(500).json({
-            error: 'Failed to parse Gemini response',
-            rawResponse: resultText
-          });
+        // 如果有 responseSchema，嘗試解析為 JSON
+        if (responseSchema) {
+          try {
+            const parsedResult = JSON.parse(resultText);
+            console.log('✅ 文章生成成功（JSON）');
+            return res.json(parsedResult);
+          } catch (parseError) {
+            console.error('❌ JSON 解析失敗:', parseError.message);
+            console.log('原始回應:', resultText);
+            return res.status(500).json({
+              error: 'Failed to parse Gemini response',
+              rawResponse: resultText
+            });
+          }
+        } else {
+          // 沒有 schema，直接返回文本（HTML）
+          console.log('✅ 文章生成成功（HTML）');
+          return res.json({ text: resultText });
         }
       }
     }
