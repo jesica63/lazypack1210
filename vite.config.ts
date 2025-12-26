@@ -11,10 +11,9 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        // 🚑 防止 process is not defined 錯誤
-        'process.env': {}, 
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        // 🔒 Security Fix: Use backend API endpoint instead of exposing API key
+        'process.env': {},
+        'process.env.API_ENDPOINT': JSON.stringify(env.API_ENDPOINT || 'http://localhost:8787'),
         'global': {},
       },
       resolve: {
