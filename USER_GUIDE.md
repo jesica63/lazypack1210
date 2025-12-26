@@ -42,12 +42,28 @@
 ### 步驟 1️⃣：開啟後台廚房（API 伺服器）
 
 **方法：**
-1. 打開「終端機」程式（Terminal）
-   - Mac 用戶：在 Launchpad 搜尋「終端機」
+1. 打開「終端機」程式
+   - **Mac 用戶**：在 Launchpad 搜尋「終端機」（Terminal）
+   - **Windows 用戶**：按 `Win + R`，輸入 `cmd`，按 Enter 開啟「命令提示字元」
+     - 或在開始選單搜尋「PowerShell」
 
 2. 輸入以下指令，然後按 Enter：
+
+   **Mac / Linux：**
    ```bash
    cd /你的專案資料夾路徑/lazypack1210
+   npm run server
+   ```
+
+   **Windows：**
+   ```bash
+   cd C:\你的專案資料夾路徑\lazypack1210
+   npm run server
+   ```
+
+   **Windows 路徑範例：**
+   ```bash
+   cd C:\Users\你的使用者名稱\Documents\GitHub\lazypack1210
    npm run server
    ```
 
@@ -70,9 +86,26 @@
 
 **方法：**
 1. 再開啟**另一個**終端機視窗
+   - **Mac 用戶**：開新的終端機視窗（⌘ + N）或新分頁（⌘ + T）
+   - **Windows 用戶**：再次按 `Win + R` 輸入 `cmd`，或開新的 PowerShell 視窗
+
 2. 輸入以下指令：
+
+   **Mac / Linux：**
    ```bash
    cd /你的專案資料夾路徑/lazypack1210
+   npm run dev
+   ```
+
+   **Windows：**
+   ```bash
+   cd C:\你的專案資料夾路徑\lazypack1210
+   npm run dev
+   ```
+
+   **Windows 路徑範例：**
+   ```bash
+   cd C:\Users\你的使用者名稱\Documents\GitHub\lazypack1210
    npm run dev
    ```
 
@@ -81,7 +114,7 @@
    ➜  Local:   http://localhost:5173/
    ```
 
-4. 打開瀏覽器（Chrome 或 Safari），輸入上面顯示的網址
+4. 打開瀏覽器（Chrome、Edge 或 Safari），輸入上面顯示的網址
    - 通常是：`http://localhost:5173` 或 `http://localhost:3000`
 
 **成功畫面：**
@@ -253,8 +286,10 @@ https://health.udn.com/health/story/ai-medicine
 
 **正確關閉方式：**
 1. 關閉瀏覽器分頁
-2. 在兩個終端機視窗按 `Ctrl + C`
+2. 在兩個終端機視窗按 `Ctrl + C`（Mac 和 Windows 都一樣）
 3. 關閉終端機視窗
+   - **Mac**：關閉 Terminal 視窗
+   - **Windows**：關閉命令提示字元或 PowerShell 視窗
 
 **下次使用時：**
 重新執行「步驟 1️⃣」和「步驟 2️⃣」即可
@@ -333,6 +368,6 @@ https://health.udn.com/health/story/ai-medicine
 
 ---
 
-**文件版本：** v1.0
-**最後更新：** 2025/12/25
-**適用系統：** SEO LazyPack 本地開發環境
+**文件版本：** v1.1
+**最後更新：** 2025/12/26
+**適用系統：** SEO LazyPack 本地開發環境（Windows 10+、macOS、Linux）
