@@ -1,5 +1,8 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
 import { ScrapedContent, ArchitectDraft } from "../types";
+
+// 🔒 Security Fix: Use backend API proxy instead of direct Gemini API calls
+const API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:8787';
 
 // ==========================================
 // 1. Configuration: 公司語態設定 (Style Guide)
@@ -76,14 +79,13 @@ const fetchAndCleanUrl = async (url: string, id: number): Promise<ScrapedContent
 // Stage 1: The Architect (架構師 - 結構化輸出)
 // ==========================================
 const runArchitectStage = async (
-  ai: GoogleGenAI, 
-  topic: string, 
-  outline: string[], 
+  topic: string,
+  outline: string[],
   scrapedData: ScrapedContent[]
 ): Promise<ArchitectDraft[]> => {
-  
+
   const validData = scrapedData.filter(d => d.content.length > 100);
-  
+
   if (validData.length === 0) {
     throw new Error("無法讀取任何有效內容。請檢查網址是否公開且無防火牆阻擋。");
   }
@@ -92,7 +94,7 @@ const runArchitectStage = async (
 
   const systemInstruction = `
     你是一名資訊架構師。你的任務是閱讀「原始資料」，並根據使用者提供的「大綱」，將資料分配到大綱的每一個段落中。
-    
+
     【嚴格規則】
     1. **結構一致性**：必須嚴格遵守使用者的大綱順序，不可遺漏任何一點，也不可自行增加大綱以外的段落。
     2. **內容豐富度**：每個段落必須提取充足的資訊（數據、案例、觀點），足以讓編輯擴寫成 300 字以上的段落。
@@ -100,9 +102,9 @@ const runArchitectStage = async (
     4. **缺漏處理**：如果某個大綱段落找不到相關資料，請在 contentDraft 中明確標註「無直接資料，請根據常識與主題邏輯撰寫」，不要瞎掰來源。
   `;
 
-  const userPrompt = `
+  const prompt = `
     主題：${topic}
-    
+
     使用者大綱 (請為以下每一點生成內容草稿)：
     ${JSON.stringify(outline)}
 
@@ -110,17 +112,17 @@ const runArchitectStage = async (
     ${dataContext}
   `;
 
-  const schema = {
+  const responseSchema = {
     type: Type.ARRAY,
     items: {
       type: Type.OBJECT,
       properties: {
         sectionTitle: { type: Type.STRING, description: "對應的使用者大綱標題" },
         contentDraft: { type: Type.STRING, description: "該段落的詳細事實筆記，包含數據與引用" },
-        sourceIds: { 
-          type: Type.ARRAY, 
+        sourceIds: {
+          type: Type.ARRAY,
           items: { type: Type.NUMBER },
-          description: "該段落引用的來源 ID 列表" 
+          description: "該段落引用的來源 ID 列表"
         }
       },
       required: ["sectionTitle", "contentDraft", "sourceIds"]
@@ -128,22 +130,26 @@ const runArchitectStage = async (
   };
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp", 
-      contents: [{ parts: [{ text: userPrompt }] }],
-      config: {
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        responseMimeType: "application/json",
-        responseSchema: schema,
+    // 呼叫後端 API
+    const response = await fetch(`${API_ENDPOINT}/api/curate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        prompt,
+        systemInstruction,
+        responseSchema
+      })
     });
 
-    // 🔥 修正關鍵：不加括號
-    const text = response.text; 
-    
-    if (!text) throw new Error("AI 回傳空內容");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API request failed: ${response.status}`);
+    }
 
-    return JSON.parse(text) as ArchitectDraft[];
+    const result = await response.json() as ArchitectDraft[];
+    return result;
 
   } catch (error: any) {
     console.error("Architect stage failed detail:", error);
@@ -155,7 +161,6 @@ const runArchitectStage = async (
 // Stage 2: The Chief Editor (總編輯 - 風格潤飾)
 // ==========================================
 const runEditorStage = async (
-  ai: GoogleGenAI, 
   topic: string,
   userIntro: string,
   architectDrafts: ArchitectDraft[],
@@ -169,7 +174,7 @@ const runEditorStage = async (
     ${COMPANY_STYLE_GUIDE}
 
     你現在是總編輯。你的任務是將架構師提供的「段落草稿」改寫成一篇完整的 HTML 懶人包文章。
-    
+
     【執行細節】
     1. **開場 (Intro)**：根據使用者的指示 (${userIntro}) 寫一段精彩的開場白。
     2. **內文擴寫**：針對 JSON 中的每一個 sectionTitle，使用 contentDraft 寫出一段完整的內容。
@@ -179,14 +184,14 @@ const runEditorStage = async (
     3. **引用來源**：在每個段落結束後，根據 sourceIds，加入延伸閱讀連結。
        - 格式：<br><small>(延伸閱讀：<a href="{URL}" target="_blank">{Title}</a>)</small>
     4. **結語**：自動產生一段總結。
-    
+
     【輸出格式】
     僅回傳 HTML <body> 內的代碼，不要 Markdown 標記，不要 <html> 標籤。
   `;
 
-  const userPrompt = `
+  const prompt = `
     文章主題：${topic}
-    
+
     架構師提供的草稿 (JSON)：
     ${draftContext}
 
@@ -195,22 +200,34 @@ const runEditorStage = async (
   `;
 
   try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash-exp", 
-        contents: [{ parts: [{ text: userPrompt }] }],
-        config: {
-          systemInstruction: { parts: [{ text: systemInstruction }] },
-        },
-      });
+    // 呼叫後端 API（不使用 responseSchema，因為是 HTML 輸出）
+    const response = await fetch(`${API_ENDPOINT}/api/curate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        systemInstruction,
+        responseSchema: null  // 不使用 schema，返回純文字
+      })
+    });
 
-      // 🔥 修正關鍵：不加括號
-      let html = response.text || "";
-      
-      html = html.replace(/```html/g, '').replace(/```/g, '').trim();
-      return html;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API request failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+    let html = result.text || "";
+
+    // 清理可能的 Markdown 代碼塊標記
+    html = html.replace(/```html/g, '').replace(/```/g, '').trim();
+    return html;
+
   } catch (error: any) {
-      console.error("Editor stage failed:", error);
-      throw new Error(`文章撰寫失敗: ${error.message}`);
+    console.error("Editor stage failed:", error);
+    throw new Error(`文章撰寫失敗: ${error.message}`);
   }
 };
 
@@ -218,19 +235,16 @@ const runEditorStage = async (
 // Main Function (主程式入口)
 // ==========================================
 export const generateCuratedArticle = async (
-  topic: string, 
-  intro: string, 
+  topic: string,
+  intro: string,
   outline: string[],
-  urls: string[], 
+  urls: string[],
   onStatusChange: (status: 'scraping' | 'analyzing' | 'writing' | 'done') => void
 ): Promise<string> => {
-  if (!process.env.API_KEY) throw new Error("API Key missing");
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
   // 1. Scraping
   onStatusChange('scraping');
   const scrapedData: ScrapedContent[] = [];
-  
+
   const promises = urls.slice(0, 6).map((url, index) => fetchAndCleanUrl(url, index + 1));
   const results = await Promise.allSettled(promises);
 
@@ -246,15 +260,15 @@ export const generateCuratedArticle = async (
 
   // 2. Architect
   onStatusChange('analyzing');
-  const effectiveOutline = (outline && outline.length > 0) 
-    ? outline 
+  const effectiveOutline = (outline && outline.length > 0)
+    ? outline
     : ["背景與前言", "核心議題分析", "主要優勢與挑戰", "未來展望與建議"];
-    
-  const drafts = await runArchitectStage(ai, topic, effectiveOutline, scrapedData);
+
+  const drafts = await runArchitectStage(topic, effectiveOutline, scrapedData);
 
   // 3. Editor
   onStatusChange('writing');
-  const finalHtml = await runEditorStage(ai, topic, intro, drafts, scrapedData);
+  const finalHtml = await runEditorStage(topic, intro, drafts, scrapedData);
 
   onStatusChange('done');
   return finalHtml;
