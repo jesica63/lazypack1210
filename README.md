@@ -43,8 +43,40 @@ npm run dev
 **詳細安全說明請參考**：
 - [SECURITY.md](./SECURITY.md) - 安全性指南
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - 完整部署指南
-▶️ 如何啟動 (Running the App)關鍵指令：啟動引擎在終端機輸入以下指令來啟動開發伺服器：npm run dev
-看到 ➜ Local: http://localhost:5173/ 出現後，按住 Ctrl (或 Cmd) 點擊網址，即可在瀏覽器開啟。💡 給新手的觀念小補帖 (必讀！)Q: 為什麼我不能直接點兩下 index.html 來開啟程式？A: 因為這個專案使用了現代化的 React + TypeScript 技術，這些高級語法瀏覽器是「看不懂」的。npm run dev 就像是啟動了一位 「即時口譯員 (Vite)」。它會在背景幫你把程式碼翻譯成瀏覽器看得懂的語言。結論：只要你還在開發或使用這個工具，npm run dev 就是你每天打開電腦後的起手式！🍎 Mac 用戶專屬：一鍵啟動捷徑如果你覺得每次都要開終端機很麻煩，可以使用專案內附的 start_app.command 檔案。首次使用前的設定 (解除封印)：由於 Mac 的安全機制，第一次使用前需要賦予執行權限。請在終端機執行：# 1. 進入資料夾
+- [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - 🔧 故障排除指南（遇到錯誤必看）
+▶️ 如何啟動 (Running the App)
+
+### 🚀 方法一：一鍵啟動（推薦）
+
+使用專案內建的啟動腳本，自動啟動前端與後端：
+
+```bash
+./start-dev.sh
+```
+
+**首次使用**：腳本會自動檢查環境並提示你設定 API Key。
+
+### 🛠️ 方法二：手動啟動
+
+**開啟兩個終端視窗**：
+
+**終端 1 - 啟動後端 Worker**：
+```bash
+cd worker
+npm run dev
+```
+
+**終端 2 - 啟動前端**：
+```bash
+npm run dev
+```
+
+看到 ➜ Local: http://localhost:3000/ 出現後，按住 Ctrl (或 Cmd) 點擊網址，即可在瀏覽器開啟。
+
+### ❌ 遇到錯誤？
+
+如果看到「Failed to fetch」或其他錯誤訊息，請參考：
+📖 **[故障排除指南 (TROUBLESHOOTING.md)](./TROUBLESHOOTING.md)**💡 給新手的觀念小補帖 (必讀！)Q: 為什麼我不能直接點兩下 index.html 來開啟程式？A: 因為這個專案使用了現代化的 React + TypeScript 技術，這些高級語法瀏覽器是「看不懂」的。npm run dev 就像是啟動了一位 「即時口譯員 (Vite)」。它會在背景幫你把程式碼翻譯成瀏覽器看得懂的語言。結論：只要你還在開發或使用這個工具，npm run dev 就是你每天打開電腦後的起手式！🍎 Mac 用戶專屬：一鍵啟動捷徑如果你覺得每次都要開終端機很麻煩，可以使用專案內附的 start_app.command 檔案。首次使用前的設定 (解除封印)：由於 Mac 的安全機制，第一次使用前需要賦予執行權限。請在終端機執行：# 1. 進入資料夾
 cd 你的專案路徑/lazypack1210
 
 # 2. 賦予執行權限
